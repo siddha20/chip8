@@ -16,11 +16,11 @@ add_library(
   emulator
   src/emulator/processor.cpp src/emulator/memory.cpp src/emulator/display.cpp
   src/emulator/keyboard.cpp src/emulator/runner.cpp)
-  add_library(
-    emulatordebug
-    src/emulator/processor.cpp src/emulator/memory.cpp src/emulator/display.cpp
-    src/emulator/keyboard.cpp src/emulator/runner.cpp)
-  
+add_library(
+  emulatordebug
+  src/emulator/processor.cpp src/emulator/memory.cpp src/emulator/display.cpp
+  src/emulator/keyboard.cpp src/emulator/runner.cpp)
+
 target_compile_definitions(chip8debug PUBLIC DEBUG)
 target_compile_definitions(emulatordebug PUBLIC DEBUG)
 
@@ -58,6 +58,7 @@ target_link_libraries(chip8 PRIVATE emulator SDL2::SDL2 SDL2::SDL2main)
 target_link_libraries(emulator PRIVATE SDL2::SDL2 SDL2::SDL2main
                                        SDL2_ttf::SDL2_ttf)
 target_include_directories(chip8debug PRIVATE src/emulator)
-target_link_libraries(chip8debug PRIVATE emulatordebug SDL2::SDL2 SDL2::SDL2main)
+target_link_libraries(chip8debug PRIVATE emulatordebug SDL2::SDL2
+                                         SDL2::SDL2main)
 target_link_libraries(emulatordebug PRIVATE SDL2::SDL2 SDL2::SDL2main
-                                       SDL2_ttf::SDL2_ttf)
+                                            SDL2_ttf::SDL2_ttf)
