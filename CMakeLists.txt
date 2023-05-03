@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED 20)
 
 project(chip8 LANGUAGES CXX)
 
-add_executable(chip8 WIN32 src/main.cpp)
+add_executable(chip8 src/main.cpp)
 add_library(emulator src/emulator/processor.cpp
                      src/emulator/memory.cpp
                      src/emulator/display.cpp
@@ -42,7 +42,6 @@ file(COPY fonts/arial.ttf
         ${CMAKE_SOURCE_DIR}/bin
     )
 endif()
-
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
