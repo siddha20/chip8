@@ -23,8 +23,6 @@ void Processor::step()
 {
     last_function = get_instruction();
     if (last_function) (this->*last_function)();
-    if (memory.get_special_registers().DT) --memory.get_special_registers().DT;
-    if (memory.get_special_registers().ST) --memory.get_special_registers().ST;
     if (!pause_execution &&
         last_function != &Processor::JP1 &&
         last_function != &Processor::JP2 &&
@@ -33,6 +31,12 @@ void Processor::step()
     {
         program_counter += 2;
     }
+}
+
+void Processor::decrement_timers()
+{
+    if (memory.get_special_registers().DT) --memory.get_special_registers().DT;
+    if (memory.get_special_registers().ST) --memory.get_special_registers().ST;
 }
 
 std::string Processor::debug_information() const

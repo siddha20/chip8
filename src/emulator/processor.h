@@ -30,6 +30,7 @@ public:
     const std::string &get_last_instruction_name() const { return last_instruction_name; }
     std::string debug_information() const;
     void step();
+    void decrement_timers();
     void test1();
 
 private:

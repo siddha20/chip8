@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     //    emulator::Runner r = emulator::Runner("CONNECT4");
     //    emulator::Runner r = emulator::Runner("BRIX");
     //    emulator::Runner r = emulator::Runner("PONG");
-    emulator::Runner r = emulator::Runner("INVADERS");
+    emulator::Runner r = emulator::Runner("TETRIS");
     // emulator::Runner r = emulator::Runner("Chip8Logo.ch8");
     // emulator::Runner r = emulator::Runner("test_opcode.ch8");
     // emulator::Runner r = emulator::Runner("c8_test.c8");

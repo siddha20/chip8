@@ -47,10 +47,11 @@ void Runner::start()
 {
     SDL_Event event;
     bool quit = false;
-
+    double clock_accumulator = 0, clock_delta = 0;
+    uint64_t start_tick = 0, end_tick = 0, delta_tick = 0;
     while (!quit) 
     {
-        uint64_t start_tick = SDL_GetTicks64();
+        start_tick = SDL_GetTicks64();
         while (SDL_PollEvent(&event))
         {
             /* For some reason a KEYDOWN and KEYUP is registered on the same
@@ -81,16 +82,24 @@ void Runner::start()
                     break;
             }
         }
+        clock_delta = static_cast<double>(start_tick) - static_cast<double>(end_tick);
+        clock_delta = clock_delta > 100.0f ? 100.0f : clock_delta;
+        end_tick = SDL_GetTicks64();
+        clock_accumulator += clock_delta;
+        while (clock_accumulator >= 1000.0f/static_cast<double>(CLOCK_RATE))
+        {
+            processor.decrement_timers();
+            clock_accumulator -= 1000.0f/static_cast<double>(CLOCK_RATE);
+        }
+
         processor.step();
         draw_display(processor.display);
 
         // Slows down loop a bit. Use for debugging only.
-        update_debug_window();
+        // update_debug_window();
 
-        uint64_t end_tick = SDL_GetTicks64();
-        uint64_t delta_tick = end_tick - start_tick;
-        if(delta_tick < (1000 / FRAME_RATE)) SDL_Delay((1000 / FRAME_RATE) - delta_tick);
-
+        delta_tick = end_tick - start_tick;
+        if(delta_tick < (1000 / CPU_RATE)) SDL_Delay((1000 / CPU_RATE) - delta_tick);
         // SDL_Delay(1000);
     }
 }

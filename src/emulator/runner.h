@@ -15,7 +15,8 @@ public:
     static constexpr int WINDOW_WIDTH = 640;
     static constexpr int DEBUG_WINDOW_HEIGHT = 500;
     static constexpr int DEBUG_WINDOW_WIDTH = 500;
-    static constexpr unsigned int FRAME_RATE = 500;
+    static constexpr unsigned int CPU_RATE = 1000;
+    static constexpr unsigned int CLOCK_RATE = 30;
 
     Runner(const std::string &rom_file_name);
     ~Runner();
