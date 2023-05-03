@@ -26,7 +26,9 @@ Runner::Runner(const std::string &rom_file_name)
     assert(font);
     if (SDL_Init(SDL_INIT_VIDEO) < 0) std::cout << "Failed to initialize the SDL2 library" << std::endl;
     create_window();
-    create_debug_window();
+    #ifdef DEBUG
+        create_debug_window();
+    #endif
     create_key_mapping();
 }
 
@@ -34,21 +36,27 @@ Runner::~Runner()
 { 
     SDL_FreeSurface(surface);
     SDL_DestroyWindow(window); 
-    SDL_DestroyTexture(debug_texture);
-    SDL_DestroyWindow(debug_window);
-    SDL_DestroyRenderer(debug_renderer);
+    #ifdef DEBUG
+        SDL_DestroyTexture(debug_texture);
+        SDL_DestroyWindow(debug_window);
+        SDL_DestroyRenderer(debug_renderer);
+    #endif
     TTF_CloseFont(font);
     TTF_Quit();
     SDL_Quit();
 }
 
-
 void Runner::start()
 {
     SDL_Event event;
     bool quit = false;
+    bool pause = false;
+    #ifdef DEBUG
+        pause = true;
+    #endif
     double clock_accumulator = 0, clock_delta = 0;
-    uint64_t start_tick = 0, end_tick = 0, delta_tick = 0;
+    uint64_t start_tick = 0, end_tick = 0, delta_tick, end_frame_tick = 0;
+    int clock_rate_modifier = 0, step = 5;
     while (!quit) 
     {
         start_tick = SDL_GetTicks64();
@@ -62,29 +70,26 @@ void Runner::start()
                 case SDL_WINDOWEVENT:
                     if (event.window.event == SDL_WINDOWEVENT_CLOSE) quit = true;
                 case SDL_KEYDOWN:
-                    if (event.key.repeat == 0)
+                    if (event.key.repeat == 0 && key_mapping.contains(event.key.keysym.sym))
                     {
-                        if (key_mapping.contains(event.key.keysym.sym)) {
-                            std::cout << "key down" << std::endl;
-                            processor.keyboard[key_mapping.at(event.key.keysym.sym)] = 1;
-                            key_down = true;
-                        }
+                        processor.keyboard[key_mapping.at(event.key.keysym.sym)] = 1;
+                        key_down = true;
                     }
+                    #ifdef DEBUG
+                        if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_RIGHTBRACKET) clock_rate_modifier += step;
+                        if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_LEFTBRACKET && CPU_RATE + clock_rate_modifier > step) clock_rate_modifier -= step;
+                    #endif
+                    if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_p) pause = !pause;
                 case SDL_KEYUP:
-                    if (event.key.repeat == 0 && !key_down)
-                    {
-                        if (key_mapping.contains(event.key.keysym.sym)) {
-                            std::cout << "key up" << std::endl;
-                            processor.keyboard[key_mapping.at(event.key.keysym.sym)] = 0;
-                        }
-                    }
+                    if (event.key.repeat == 0 &&
+                        !key_down &&
+                        key_mapping.contains(event.key.keysym.sym)) processor.keyboard[key_mapping.at(event.key.keysym.sym)] = 0;
                 default:
                     break;
             }
         }
         clock_delta = static_cast<double>(start_tick) - static_cast<double>(end_tick);
         clock_delta = clock_delta > 100.0f ? 100.0f : clock_delta;
-        end_tick = SDL_GetTicks64();
         clock_accumulator += clock_delta;
         while (clock_accumulator >= 1000.0f/static_cast<double>(CLOCK_RATE))
         {
@@ -92,15 +97,23 @@ void Runner::start()
             clock_accumulator -= 1000.0f/static_cast<double>(CLOCK_RATE);
         }
 
-        processor.step();
-        draw_display(processor.display);
+        if (!pause)
+        {
+            processor.step();
+            draw_display(processor.display);
+        }
 
-        // Slows down loop a bit. Use for debugging only.
-        // update_debug_window();
-
+        #ifdef DEBUG
+            // Slows down loop a bit. Debug use only.
+            update_debug_window();
+            std::string hz = std::to_string(1000 / ( start_tick > end_tick ? start_tick - end_tick : 1000));
+            render_debug_text("CPU rate: " + hz + "(" + std::to_string(CPU_RATE + clock_rate_modifier) + ")", {20, 110});
+            SDL_RenderPresent(debug_renderer);
+        #endif
+        
+        end_tick = SDL_GetTicks64();
         delta_tick = end_tick - start_tick;
-        if(delta_tick < (1000 / CPU_RATE)) SDL_Delay((1000 / CPU_RATE) - delta_tick);
-        // SDL_Delay(1000);
+        if(delta_tick < (1000 / (CPU_RATE + clock_rate_modifier))) SDL_Delay((1000 / (CPU_RATE + clock_rate_modifier)) - delta_tick);
     }
 }
 
@@ -159,30 +172,30 @@ void Runner::update_debug_window()
     for (size_t i = 0; i < processor.memory.REGISTER_COUNT; i++)
     {
         register_info << std::uppercase << std::hex << "V" << i << std::setw(3);
-        register_info << "0x" << static_cast<int>(processor.memory.get_registers(i));
+        register_info << std::dec << "0d" << static_cast<int>(processor.memory.get_registers(i));
         render_debug_text(register_info.str(), {20, 150 + (i * 20)});
         register_info.str("");
         register_info.clear();
     }
 
-    register_info << std::uppercase << std::hex << std::setw(4) << "I" << std::setw(4);
-    register_info << "0x" << static_cast<int>(processor.memory.get_special_registers().I);
+    register_info << std::uppercase << std::dec << std::setw(4) << "I" << std::setw(4);
+    register_info << "0d" << static_cast<int>(processor.memory.get_special_registers().I);
     render_debug_text(register_info.str(), {120, 150});
     register_info.str("");
     register_info.clear();
 
-    register_info << std::uppercase << std::hex << "DT" << std::setw(3);
-    register_info << "0x" << static_cast<int>(processor.memory.get_special_registers().DT);
+    register_info << std::uppercase << std::dec << "DT" << std::setw(3);
+    register_info << "0d" << static_cast<int>(processor.memory.get_special_registers().DT);
     render_debug_text(register_info.str(), {120, 170});
     register_info.str("");
     register_info.clear();
 
-    register_info << std::uppercase << std::hex << "ST" << std::setw(3);
-    register_info << "0x" << static_cast<int>(processor.memory.get_special_registers().ST);
+    register_info << std::uppercase << std::dec << "ST" << std::setw(3);
+    register_info << "0d" << static_cast<int>(processor.memory.get_special_registers().ST);
     render_debug_text(register_info.str(), {120, 190});
     register_info.str("");
     register_info.clear();
-    SDL_RenderPresent(debug_renderer);
+    // SDL_RenderPresent(debug_renderer);
 }
 
 void Runner::render_debug_text(const std::string &text, Display::Position position)
@@ -191,9 +204,9 @@ void Runner::render_debug_text(const std::string &text, Display::Position positi
     TTF_SizeText(font, text.c_str(), &w, &h);
 
     SDL_Color color = {0xFF, 0xFF, 0xFF}, bgcolor={0, 0, 0};
+
     SDL_Surface *surface = TTF_RenderText_Shaded(font, text.c_str(), color, bgcolor);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(debug_renderer, surface);
-
     SDL_Rect dstrect = {static_cast<int>(position.row), static_cast<int>(position.col), w, h};
     SDL_Rect bgrect = {static_cast<int>(position.row), static_cast<int>(position.col), w+60, h+10};
     SDL_RenderCopy(debug_renderer, texture, NULL, &dstrect);
@@ -218,7 +231,7 @@ void Runner::create_window()
 
 void Runner::create_debug_window()
 {
-    debug_window = SDL_CreateWindow( "chip8 emulator debug"
+    debug_window = SDL_CreateWindow( "c8 debug"
                                     , SDL_WINDOWPOS_CENTERED + (2 * DEBUG_WINDOW_WIDTH)
                                     , SDL_WINDOWPOS_CENTERED + (2 * DEBUG_WINDOW_WIDTH)
                                     , DEBUG_WINDOW_WIDTH
@@ -229,8 +242,6 @@ void Runner::create_debug_window()
     debug_renderer = SDL_CreateRenderer(debug_window, -1, 0);
     if (!debug_renderer) std::cout << "Failed to get the renderer from the window" << std::endl;
 }
-
-
 
 void Runner::create_key_mapping()
 {
@@ -250,7 +261,5 @@ void Runner::create_key_mapping()
     key_mapping[SDLK_x] = 0x0;
     key_mapping[SDLK_c] = 0xB;
     key_mapping[SDLK_v] = 0xF;
-
-    std::cout << "mapping done" << std::endl;
 }
 }

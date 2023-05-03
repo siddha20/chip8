@@ -62,7 +62,6 @@ Processor::instruction Processor::get_instruction()
     u16 instruction = (byte1 << 8) + byte2;
     last_instruction = instruction;
 
-    // TODO: Switch to switch case instead.
     if (instruction == 0x00E0)
     {
         last_instruction_name = "CLS";
@@ -279,19 +278,16 @@ Processor::instruction Processor::get_instruction()
     }
 }
 
-// 0nnn
 void Processor::SYS()
 {
     program_counter = last_instruction & 0x0FFF;
 }
 
-// 00E0
 void Processor::CLS()
 {
     display.clear_display();
 }
 
-// 00EE
 void Processor::RET()
 {
     program_counter = memory.get_stack(stack_pointer == 0 ? 0 : stack_pointer--);
@@ -420,7 +416,7 @@ void Processor::LD10()
     u16 I = memory.get_special_registers().I;
     std::copy(registers_itr, registers_itr + (x + 1), memory.get_memory_iterator() + I);
 
-    // Do I need this?
+    /* Alternative LD10 */
     // memory.get_special_registers().I += (x + 1);
 }
 
@@ -431,7 +427,7 @@ void Processor::LD11()
     u16 I = memory.get_special_registers().I;
     std::copy(memory_itr + I, memory_itr + I + (x + 1), memory.get_registers_iterator());
     
-    // Do I need this?
+    /* Alternative LD11 */
     // memory.get_special_registers().I += (x + 1);
 }
 
@@ -460,7 +456,7 @@ void Processor::OR()
     auto [x, y] = get_xy_from_instruction();
     memory.get_registers(x) |= memory.get_registers(y);
 
-    // Do I need this?
+    /* Alternative OR */
     memory.get_registers(0xF) = 0;
 }
 
@@ -469,7 +465,7 @@ void Processor::AND()
     auto [x, y] = get_xy_from_instruction();
     memory.get_registers(x) &= memory.get_registers(y);
 
-    // Do I need this?
+    /* Alternative AND */
     memory.get_registers(0xF) = 0;
 }
 
@@ -478,7 +474,7 @@ void Processor::XOR()
     auto [x, y] = get_xy_from_instruction();
     memory.get_registers(x) ^= memory.get_registers(y);
 
-    // Do I need this?
+    /* Alternative XOR */
     memory.get_registers(0xF) = 0;
 }
 
@@ -487,12 +483,8 @@ void Processor::SUB()
     auto [x, y] = get_xy_from_instruction();
     if (x == 0xF) std::cout << "WHYYY" << std::endl;
     if (y == 0xF) std::cout << "WHYYY2" << std::endl;
-    // u8 result = memory.get_registers(x) - memory.get_registers(y);
     memory.get_registers(0xF) = memory.get_registers(x) > memory.get_registers(y) ? 1 : 0;
     memory.get_registers(x) -= memory.get_registers(y);
-
-    // memory.get_registers(x) = result;
-
 }
 
 void Processor::SHR()
@@ -501,22 +493,17 @@ void Processor::SHR()
     memory.get_registers(0xF) =  memory.get_registers(x) & 1 ? 1 : 0;
     memory.get_registers(x) >>= 1;
 
-    // Do I do this?
+    /* Alternative SHR */
     // auto [x, y] = get_xy_from_instruction();
     // memory.get_registers(x) = memory.get_registers(y);
     // memory.get_registers(0xF) =  memory.get_registers(x) & 1 ? 1 : 0;
     // memory.get_registers(x) >>= 1;
-
-
 }
 
 void Processor::SUBN()
 {
     auto [x, y] = get_xy_from_instruction();
-    // u8 result = memory.get_registers(y) - memory.get_registers(x);
-    // memory.get_registers(x) = memory.get_registers(y) - memory.get_registers(x);
     memory.get_registers(0xF) = memory.get_registers(y) > memory.get_registers(x) ?  1 : 0;
-    // memory.get_registers(x) = result;
     memory.get_registers(x) = memory.get_registers(y) - memory.get_registers(x);
 }
 
@@ -526,7 +513,7 @@ void Processor::SHL()
     memory.get_registers(0xF) =  memory.get_registers(x) >> 7 ? 1 : 0;
     memory.get_registers(x) <<= 1;
 
-    // Do I do this?
+    /* Alternative SHL */
     // auto [x, y] = get_xy_from_instruction();
     // memory.get_registers(x) = memory.get_registers(y);
     // memory.get_registers(0xF) =  memory.get_registers(x) >> 7 ? 1 : 0;
@@ -549,13 +536,6 @@ void Processor::DRW()
     u8 Vy = memory.get_registers(y);
     memory.get_registers(0xF) = 0;
 
-    /* Debug */
-    // u16 I = memory.SPRITE_INDEX_START + 50;
-    // u8 n = 5;
-    // u8 Vx = 20;
-    // u8 Vy = 10;
-    // u8 collision = 0;
-
     for (u8 i = 0; i < n; i++)
     {
         u8 sprite = memory.get_memory(I + i);
@@ -564,9 +544,7 @@ void Processor::DRW()
             u8 new_pixel = (sprite >> (7 - j)) & 1;
             size_t row = (Vx + j) % display.CHIP8_LENGTH;
             size_t col = (Vy + i) % display.CHIP8_HEIGHT;
-            // memory.get_registers(0xF) |= (display[{col, row}] != new_pixel) && (display[{col, row}] == 1); 
             memory.get_registers(0xF) |= new_pixel & display[{col, row}]; 
-     
             display[{col, row}] ^= new_pixel;
         }
     }
@@ -582,82 +560,5 @@ void Processor::SKNP()
 {
     auto [x, _] = get_xy_from_instruction();
     if (!keyboard[memory.get_registers(x)]) program_counter += 2;
-}
-
-void Processor::test1()
-{
-    instruction func = nullptr;
-
-    memory.get_memory(0) = 0x00;
-    memory.get_memory(1) = 0xE0;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(2) = 0x00;
-    memory.get_memory(3) = 0xEE;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(4) = 0x1A;
-    memory.get_memory(5) = 0xBC;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(6) = 0x2A;
-    memory.get_memory(7) = 0xBC;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(8) = 0x5A;
-    memory.get_memory(9) = 0xB0;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(10) = 0x5A;
-    memory.get_memory(11) = 0xB0;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(12) = 0x6A;
-    memory.get_memory(13) = 0xBC;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(14) = 0x7A;
-    memory.get_memory(15) = 0xBC;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(16) = 0x8A;
-    memory.get_memory(17) = 0xB0;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(18) = 0x8A;
-    memory.get_memory(19) = 0xB1;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(20) = 0x8A;
-    memory.get_memory(21) = 0xB2;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
-
-    memory.get_memory(22) = 0x8A;
-    memory.get_memory(23) = 0xB3;
-    func = get_instruction();
-    if (func) (this->*func)();
-    std::cout << program_counter << " : " << last_instruction << " : " << last_instruction_name << std::endl;
 }
 }

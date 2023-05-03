@@ -6,6 +6,15 @@
 #include "common.h"
 #include "SDL_ttf.h"
 
+#define CPU_RATE_HZ 1000;
+#define CLOCK_RATE_HZ 60;
+#ifdef DEBUG
+    #undef CPU_RATE_HZ
+    #define CPU_RATE_HZ 60
+    #undef CLOCK_RATE_HZ
+    #define CLOCK_RATE_HZ 30
+#endif
+
 namespace emulator
 {
 class Runner
@@ -14,9 +23,9 @@ public:
     static constexpr int WINDOW_HEIGHT = 320;
     static constexpr int WINDOW_WIDTH = 640;
     static constexpr int DEBUG_WINDOW_HEIGHT = 500;
-    static constexpr int DEBUG_WINDOW_WIDTH = 500;
-    static constexpr unsigned int CPU_RATE = 1000;
-    static constexpr unsigned int CLOCK_RATE = 30;
+    static constexpr int DEBUG_WINDOW_WIDTH = 240;
+    static constexpr unsigned int CPU_RATE = CPU_RATE_HZ;
+    static constexpr unsigned int CLOCK_RATE = CLOCK_RATE_HZ;
 
     Runner(const std::string &rom_file_name);
     ~Runner();
@@ -31,7 +40,6 @@ private:
     SDL_Texture *debug_texture;
     SDL_Renderer *debug_renderer;
     TTF_Font *font;
-
     std::unordered_map<SDL_Keycode, u8> key_mapping;
     unsigned int x_scale;
     unsigned int y_scale;

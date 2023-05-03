@@ -13,7 +13,6 @@ public:
 
     void clear_status() { std::fill(key_status.begin(), key_status.end(), 0); }
     u8 get_key_press();
-
     u8 &operator [](size_t key) { return key_status[key]; }
     u8 operator [](size_t key) const { return key_status[key]; }
 

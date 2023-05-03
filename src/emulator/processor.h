@@ -31,7 +31,6 @@ public:
     std::string debug_information() const;
     void step();
     void decrement_timers();
-    void test1();
 
 private:
     u16 program_counter;

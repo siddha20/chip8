@@ -11,12 +11,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED 20)
 project(chip8 LANGUAGES CXX)
 
 add_executable(chip8 src/main.cpp)
+add_executable(chip8debug src/main.cpp)
 add_library(
   emulator
   src/emulator/processor.cpp src/emulator/memory.cpp src/emulator/display.cpp
   src/emulator/keyboard.cpp src/emulator/runner.cpp)
+  add_library(
+    emulatordebug
+    src/emulator/processor.cpp src/emulator/memory.cpp src/emulator/display.cpp
+    src/emulator/keyboard.cpp src/emulator/runner.cpp)
+  
+target_compile_definitions(chip8debug PUBLIC DEBUG)
+target_compile_definitions(emulatordebug PUBLIC DEBUG)
 
-set(TARGETS chip8 emulator)
+set(TARGETS chip8 emulator emulatordebug chip8debug)
 
 set_target_properties(
   ${TARGETS}
@@ -32,11 +40,15 @@ if(WIN32 AND MSVC)
   file(COPY SDL2/lib/x64/SDL2.dll SDL2_ttf/lib/x64/SDL2_ttf.dll fonts/arial.ttf
        DESTINATION ${CMAKE_SOURCE_DIR}/bin/Debug)
   target_include_directories(chip8 PRIVATE SDL2/include SDL2_ttf/include)
+  target_include_directories(chip8debug PRIVATE SDL2/include SDL2_ttf/include)
 elseif(APPLE)
   file(COPY fonts/arial.ttf DESTINATION ${CMAKE_SOURCE_DIR}/bin)
   target_include_directories(
     chip8 PRIVATE /Library/Frameworks/SDL2.framework/Headers
                   /Library/Frameworks/SDL2_ttf.framework/Headers)
+  target_include_directories(
+    chip8debug PRIVATE /Library/Frameworks/SDL2.framework/Headers
+                       /Library/Frameworks/SDL2_ttf.framework/Headers)
 endif()
 
 find_package(SDL2 REQUIRED)
@@ -44,4 +56,8 @@ find_package(SDL2_ttf REQUIRED)
 target_include_directories(chip8 PRIVATE src/emulator)
 target_link_libraries(chip8 PRIVATE emulator SDL2::SDL2 SDL2::SDL2main)
 target_link_libraries(emulator PRIVATE SDL2::SDL2 SDL2::SDL2main
+                                       SDL2_ttf::SDL2_ttf)
+target_include_directories(chip8debug PRIVATE src/emulator)
+target_link_libraries(chip8debug PRIVATE emulatordebug SDL2::SDL2 SDL2::SDL2main)
+target_link_libraries(emulatordebug PRIVATE SDL2::SDL2 SDL2::SDL2main
                                        SDL2_ttf::SDL2_ttf)

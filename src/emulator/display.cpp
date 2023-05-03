@@ -9,19 +9,6 @@ Display::Display()
     create_sprites(); 
 }
 
-// u8 & Display::get_pixel(const Position &position)
-// {
-//     size_t row = position.row / 8;  
-//     size_t col = position.col / 8;
-//     size_t row_offset = position.row % 8;
-//     size_t col_offset = position.col % 8;
-
-//     u8 byte_entry = [(row * COLS) + col];
-//     u8 pixel = 
-
-// }
-
-
 void constexpr Display::create_sprites()
 {
     // Digit 0
