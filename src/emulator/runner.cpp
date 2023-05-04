@@ -178,8 +178,8 @@ void Runner::update_debug_window()
         register_info.clear();
     }
 
-    register_info << std::uppercase << std::dec << std::setw(4) << "I" << std::setw(4);
-    register_info << "0d" << static_cast<int>(processor.memory.get_special_registers().I);
+    register_info << std::uppercase << std::hex << std::setw(4) << "I" << std::setw(4);
+    register_info << "0x" << static_cast<int>(processor.memory.get_special_registers().I);
     render_debug_text(register_info.str(), {120, 150});
     register_info.str("");
     register_info.clear();
@@ -231,9 +231,11 @@ void Runner::create_window()
 
 void Runner::create_debug_window()
 {
+    int x, y;
+    SDL_GetWindowPosition(window, &x, &y);
     debug_window = SDL_CreateWindow( "c8 debug"
-                                    , SDL_WINDOWPOS_CENTERED + (2 * DEBUG_WINDOW_WIDTH)
-                                    , SDL_WINDOWPOS_CENTERED + (2 * DEBUG_WINDOW_WIDTH)
+                                    , x + WINDOW_WIDTH + 50
+                                    , y
                                     , DEBUG_WINDOW_WIDTH
                                     , DEBUG_WINDOW_HEIGHT
                                     , 0 );
