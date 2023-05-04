@@ -26,8 +26,8 @@ public:
 
     Display();
 
-    std::array<u8, SIZE>::iterator get_display_iterator() { return display.begin(); }
-    std::array<u8, SPRITE_ARRAY_SIZE>::iterator get_sprites_iterator() { return sprites.begin(); }
+    auto get_display_iterator() { return display.begin(); }
+    auto get_sprites_iterator() { return sprites.begin(); }
     u8 &operator [](const Position &position) { return get_pixel(position); }
     u8 operator [](const Position &position) const { return get_pixel(position); }
     void clear_display() { std::fill(display.begin(), display.end(), 0); }

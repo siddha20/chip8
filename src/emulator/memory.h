@@ -28,9 +28,9 @@ public:
     u16 &get_stack(size_t index) { stack[index] &= 0x0FFF; return stack[index];}
     u8 &get_registers(size_t index) { return registers[index]; }
     void load_rom_to_mem(const std::vector<char> &ROM) { std::copy(ROM.begin(), ROM.end(), memory.begin() + ROM_INDEX_START); }
-    std::array<u8, MEMORY_SIZE>::iterator get_memory_iterator() { return memory.begin(); }
-    std::array<u16, STACK_SIZE>::iterator get_stack_iterator() { return stack.begin(); }
-    std::array<u8, REGISTER_COUNT>::iterator get_registers_iterator() { return registers.begin(); }
+    auto get_memory_iterator() { return memory.begin(); }
+    auto get_stack_iterator() { return stack.begin(); }
+    auto get_registers_iterator() { return registers.begin(); }
     SpecialRegisters &get_special_registers() { return special_registers; }
 
 private:
