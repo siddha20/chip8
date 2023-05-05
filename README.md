@@ -2,6 +2,8 @@
 
 A chip8 emulator written in C++.
 
+Closely follows Cowgod's manual: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#00E0
+
 ## Building
 Create a build directory and use cmake to build the project.
 
