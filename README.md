@@ -14,9 +14,10 @@ cmake ..
 ## Usage
 Run the emulator on the command line: 
 
-`chip8 <path to rom>` \
-`chip8debug <path to rom>`
+`chip8 <path to game rom>` \
+`chip8debug <path to game rom>`
 
+There are some ROMs here: https://www.zophar.net/pdroms/chip8/chip-8-games-pack.html
 
 ## Dependencies
 SDL2: https://github.com/libsdl-org/SDL/releases/tag/release-2.26.5 \
