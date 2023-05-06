@@ -29,7 +29,7 @@ set(TARGETS chip8 emulator emulatordebug chip8debug)
 set_target_properties(
   ${TARGETS}
   PROPERTIES CXX_STANDARD 20
-             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+             ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
              LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
              RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
@@ -38,7 +38,7 @@ if(WIN32 AND MSVC)
   set(SDL2_DIR SDL2/cmake)
   set(SDL2_ttf_DIR SDL2_ttf/cmake)
   file(COPY SDL2/lib/x64/SDL2.dll SDL2_ttf/lib/x64/SDL2_ttf.dll fonts/arial.ttf
-       DESTINATION ${CMAKE_SOURCE_DIR}/bin/Debug)
+       DESTINATION ${CMAKE_SOURCE_DIR}/bin)
   target_include_directories(chip8 PRIVATE SDL2/include SDL2_ttf/include)
   target_include_directories(chip8debug PRIVATE SDL2/include SDL2_ttf/include)
 elseif(APPLE)

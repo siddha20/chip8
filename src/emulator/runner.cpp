@@ -55,37 +55,40 @@ void Runner::start()
         pause = true;
     #endif
     double clock_accumulator = 0, clock_delta = 0;
-    uint64_t start_tick = 0, end_tick = 0, delta_tick, end_frame_tick = 0;
+    uint64_t start_tick = 0, end_tick = 0, delta_tick, end_frame_tick = 0, count = 0;
     int clock_rate_modifier = 0, step = 5;
     while (!quit) 
     {
         start_tick = SDL_GetTicks64();
-        while (SDL_PollEvent(&event))
+        if (!(++count % POLL_RATE))
         {
-            /* For some reason a KEYDOWN and KEYUP is registered on the same
-            frame for the same key. key_down bool is meant to fix that. */
-            bool key_down = false;
-            switch (event.type)
+            while (SDL_PollEvent(&event))
             {
-                case SDL_WINDOWEVENT:
-                    if (event.window.event == SDL_WINDOWEVENT_CLOSE) quit = true;
-                case SDL_KEYDOWN:
-                    if (event.key.repeat == 0 && key_mapping.contains(event.key.keysym.sym))
-                    {
-                        processor.keyboard[key_mapping.at(event.key.keysym.sym)] = 1;
-                        key_down = true;
-                    }
-                    #ifdef DEBUG
-                        if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_RIGHTBRACKET) clock_rate_modifier += step;
-                        if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_LEFTBRACKET && CPU_RATE + clock_rate_modifier > step) clock_rate_modifier -= step;
-                    #endif
-                    if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_p) pause = !pause;
-                case SDL_KEYUP:
-                    if (event.key.repeat == 0 &&
-                        !key_down &&
-                        key_mapping.contains(event.key.keysym.sym)) processor.keyboard[key_mapping.at(event.key.keysym.sym)] = 0;
-                default:
-                    break;
+                /* For some reason a KEYDOWN and KEYUP is registered on the same
+                frame for the same key. key_down bool is meant to fix that. */
+                bool key_down = false;
+                switch (event.type)
+                {
+                    case SDL_WINDOWEVENT:
+                        if (event.window.event == SDL_WINDOWEVENT_CLOSE) quit = true;
+                    case SDL_KEYDOWN:
+                        if (event.key.repeat == 0 && key_mapping.contains(event.key.keysym.sym))
+                        {
+                            processor.keyboard[key_mapping.at(event.key.keysym.sym)] = 1;
+                            key_down = true;
+                        }
+                        #ifdef DEBUG
+                            if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_RIGHTBRACKET) clock_rate_modifier += step;
+                            if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_LEFTBRACKET && CPU_RATE + clock_rate_modifier > step) clock_rate_modifier -= step;
+                        #endif
+                        if (event.key.repeat == 0 && event.key.keysym.sym == SDLK_p) pause = !pause;
+                    case SDL_KEYUP:
+                        if (event.key.repeat == 0 &&
+                            !key_down &&
+                            key_mapping.contains(event.key.keysym.sym)) processor.keyboard[key_mapping.at(event.key.keysym.sym)] = 0;
+                    default:
+                        break;
+                }
             }
         }
         clock_delta = static_cast<double>(start_tick) - static_cast<double>(end_tick);

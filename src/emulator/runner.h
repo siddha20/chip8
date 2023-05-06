@@ -6,13 +6,16 @@
 #include "common.h"
 #include "SDL_ttf.h"
 
-#define CPU_RATE_HZ 1000;
-#define CLOCK_RATE_HZ 60;
+#define CPU_RATE_HZ 600
+#define CLOCK_RATE_HZ 60
+#define POLL_RATE_COUNT 15
 #ifdef DEBUG
     #undef CPU_RATE_HZ
     #define CPU_RATE_HZ 60
     #undef CLOCK_RATE_HZ
     #define CLOCK_RATE_HZ 30
+    #undef POLL_RATE_HZ
+    #define POLL_RATE_COUNT 5
 #endif
 
 namespace emulator
@@ -24,6 +27,7 @@ public:
     static constexpr int WINDOW_WIDTH = 640;
     static constexpr int DEBUG_WINDOW_HEIGHT = 500;
     static constexpr int DEBUG_WINDOW_WIDTH = 240;
+    static constexpr int unsigned POLL_RATE = POLL_RATE_COUNT;
     static constexpr unsigned int CPU_RATE = CPU_RATE_HZ;
     static constexpr unsigned int CLOCK_RATE = CLOCK_RATE_HZ;
 
