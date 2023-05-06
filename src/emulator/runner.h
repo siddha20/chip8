@@ -14,7 +14,7 @@
     #define CPU_RATE_HZ 60
     #undef CLOCK_RATE_HZ
     #define CLOCK_RATE_HZ 30
-    #undef POLL_RATE_HZ
+    #undef POLL_RATE_COUNT
     #define POLL_RATE_COUNT 5
 #endif
 
