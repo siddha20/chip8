@@ -91,21 +91,16 @@ void Runner::start()
                 }
             }
         }
+        if (!pause) processor.step();
         clock_delta = static_cast<double>(start_tick) - static_cast<double>(end_tick);
         clock_delta = clock_delta > 100.0f ? 100.0f : clock_delta;
         clock_accumulator += clock_delta;
         while (clock_accumulator >= 1000.0f/static_cast<double>(CLOCK_RATE))
         {
             processor.decrement_timers();
+            draw_display(processor.display);
             clock_accumulator -= 1000.0f/static_cast<double>(CLOCK_RATE);
         }
-
-        if (!pause)
-        {
-            processor.step();
-            draw_display(processor.display);
-        }
-
         #ifdef DEBUG
             // Slows down loop a bit. Debug use only.
             update_debug_window();
@@ -113,7 +108,6 @@ void Runner::start()
             render_debug_text("CPU rate: " + hz + "(" + std::to_string(CPU_RATE + clock_rate_modifier) + ")", {20, 110});
             SDL_RenderPresent(debug_renderer);
         #endif
-        
         end_tick = SDL_GetTicks64();
         delta_tick = end_tick - start_tick;
         if(delta_tick < (1000 / (CPU_RATE + clock_rate_modifier))) SDL_Delay((1000 / (CPU_RATE + clock_rate_modifier)) - delta_tick);

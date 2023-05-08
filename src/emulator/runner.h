@@ -6,14 +6,14 @@
 #include "common.h"
 #include "SDL_ttf.h"
 
-#define CPU_RATE_HZ 600
+#define CPU_RATE_HZ 480
 #define CLOCK_RATE_HZ 60
 #define POLL_RATE_COUNT 15
 #ifdef DEBUG
     #undef CPU_RATE_HZ
     #define CPU_RATE_HZ 60
     #undef CLOCK_RATE_HZ
-    #define CLOCK_RATE_HZ 30
+    #define CLOCK_RATE_HZ 60
     #undef POLL_RATE_COUNT
     #define POLL_RATE_COUNT 5
 #endif

@@ -6,4 +6,6 @@ c8test/
 SDL2/
 SDL2_ttf/
 .vscode/
+.DS_Store
+roms/
 
